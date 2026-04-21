@@ -1,6 +1,6 @@
 repository:
   name: docker-local-agents
-  description: "🤖 Autonomous Agents: Building Your Local AI \"Crew\""
+  description: '[WIP] 🤖 Autonomous Agents: Building Your Local AI "Crew"'
   homepage: https://github.com/daemon-labs-io/docker-local-agents
   topics: daemon-labs, daemon-labs-io, docker-local-agents
   private: false

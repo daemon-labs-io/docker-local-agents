@@ -72,7 +72,7 @@ docker tag registry.labs.dae.mn/curl:latest curlimages/curl:latest
 #### Download models
 
 ```shell
-docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/llama-3.2-3b-instruct-Q4_K_M.gguf https://files.labs.dae.mn/llama-3.2-3b-instruct-Q4_K_M.gguf
+docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/llama-3.2-1b-instruct-Q4_K_M.gguf https://files.labs.dae.mn/llama-3.2-1b-instruct-Q4_K_M.gguf
 ```
 
 ```shell
@@ -116,7 +116,7 @@ docker compose ps
 Import models from local files:
 
 ```shell
-docker compose exec ollama ollama create llama3.2:3b -f /root/workshop/Modelfile.llama3.2
+docker compose exec ollama ollama create llama3.2:1b -f /root/workshop/Modelfile.llama3.2-1b
 ```
 
 ```shell
@@ -124,7 +124,7 @@ docker compose exec ollama ollama create nomic-embed-text -f /root/workshop/Mode
 ```
 
 > [!TIP]
-> **Hardware tier expectations:** On Apple Silicon or Nvidia machines (Green/Pro), agent turns should feel snappy. On Intel/AMD/Google (Yellow/Standard), expect 10 to 20 seconds per agent turn while the model runs on CPU. The workshop still works, just be patient during the verbose output.
+> **Hardware tier expectations:** `llama3.2:1b` is around 1.3 GB and runs comfortably on 8 GB CPU-only laptops. GPU-accelerated machines (Apple Silicon, Nvidia) will be quicker but the workshop works fine on either tier.
 
 Install Python dependencies:
 
@@ -133,7 +133,7 @@ docker compose run --rm python pip install -r src/requirements.txt
 ```
 
 > [!NOTE]
-> CrewAI pulls in a lot of transitive dependencies. Expect this to take 2 to 3 minutes on first run.
+> This installs the dependencies needed to ingest and embed the sample documents. We'll add CrewAI in the next section.
 
 Ingest documents and generate embeddings:
 
@@ -174,13 +174,34 @@ docker compose exec ollama ollama list
 ```
 
 > [!NOTE]
-> You should see `llama3.2:3b` and `nomic-embed-text` listed. We use `llama3.2:3b` for agent work because smaller models struggle with reliable tool calling.
+> You should see `llama3.2:1b` and `nomic-embed-text` listed. We use `llama3.2:1b` because it's small enough for any laptop while being properly fine-tuned for tool calling, which is the heart of agent work.
 
 ---
 
 ## 2. Your first agent
 
 **Goal:** Build a single agent with no tools. See it reason through a task.
+
+### Install CrewAI
+
+Add CrewAI and its tools package to `src/requirements.txt`:
+
+```text
+chromadb>=0.5.0
+langchain-text-splitters>=0.3.0
+requests>=2.31.0
+crewai>=0.86.0
+crewai-tools>=0.17.0
+```
+
+Install the updated dependencies:
+
+```shell
+docker compose run --rm python pip install -r src/requirements.txt
+```
+
+> [!NOTE]
+> CrewAI pulls in a lot of transitive dependencies. Expect this to take 2 to 3 minutes on first run.
 
 ### Create the first agent
 
@@ -191,7 +212,7 @@ import os
 from crewai import Agent, Task, Crew, LLM
 
 llm = LLM(
-    model="ollama/llama3.2:3b",
+    model="ollama/llama3.2:1b",
     base_url=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
 )
 
@@ -260,7 +281,7 @@ from crewai import Agent, Task, Crew, LLM
 from crewai.tools import tool
 
 llm = LLM(
-    model="ollama/llama3.2:3b",
+    model="ollama/llama3.2:1b",
     base_url=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
 )
 
@@ -350,7 +371,7 @@ from crewai import Agent, Task, Crew, LLM
 from crewai.tools import tool
 
 llm = LLM(
-    model="ollama/llama3.2:3b",
+    model="ollama/llama3.2:1b",
     base_url=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
 )
 
@@ -438,7 +459,7 @@ from crewai import Agent, Task, Crew, LLM, Process
 from crewai.tools import tool
 
 llm = LLM(
-    model="ollama/llama3.2:3b",
+    model="ollama/llama3.2:1b",
     base_url=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
 )
 
@@ -624,28 +645,3 @@ You've taken your local AI stack from answering questions to taking action, unde
 | Hierarchical crews         | CrewAI `Process.hierarchical` + manager agent    |
 | Graph-based workflows      | LangGraph for stateful, branching agents         |
 | Production observability   | Self-hosted Langfuse for agent tracing           |
-
----
-
-## AI Generation Disclosure
-
-| Field              | Value                     |
-| ------------------ | ------------------------- |
-| AI Involvement     | Drafted                   |
-| AI Model           | Claude Opus 4.7           |
-| AI Platform        | Claude.ai (Anthropic)     |
-| Human Accountable  | Gary Rutland, Daemon Labs |
-| Date of Generation | 21 April 2026             |
-| Document Status    | DRAFT - UNREVIEWED        |
-| Review Status      | Unreviewed AI output      |
-
-## Input Document Register
-
-| Ref     | Document                                                          | Type                       | Source                               | Date          | Classification | How Used                                                                                         |
-| ------- | ----------------------------------------------------------------- | -------------------------- | ------------------------------------ | ------------- | -------------- | ------------------------------------------------------------------------------------------------ |
-| IDR-001 | User conversation and project instructions                        | Conversation               | Gary Rutland                         | 21 April 2026 | Internal       | Workshop brief, format conventions, audience and constraints                                     |
-| IDR-002 | Luma event page: "Autonomous Agents: Building Your Local AI Crew" | Web page (two screenshots) | Daemon Labs                          | 21 April 2026 | Public         | Workshop title, four-pillar structure, Researcher/Editor roles, audience, hardware tier guidance |
-| IDR-003 | LLM Evaluation workshop README                                    | Internal Knowledge         | daemon-labs-io/docker-llm-evaluation | Prior         | Public         | Source stack (Ollama, ChromaDB, RAG bridge, ingested docs)                                       |
-| IDR-004 | RAG workshop README                                               | Internal Knowledge         | daemon-labs-io/docker-local-rag      | Prior         | Public         | ChromaDB setup, embedding model, ingestion pattern                                               |
-| IDR-005 | Secure AI Dev Box workshop README                                 | Internal Knowledge         | daemon-labs-io                       | Prior         | Public         | `llama3.2:3b` model choice and Modelfile pattern                                                 |
-| IDR-006 | Daemon Labs workshop project conventions                          | Internal Knowledge         | Project context                      | 21 April 2026 | Internal       | Section structure, callouts, UK English, in-person mirror pattern                                |
