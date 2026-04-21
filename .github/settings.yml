@@ -1,9 +1,9 @@
 repository:
-  name: workshop-template
-  description: Workshop template
-  homepage: https://github.com/daemon-labs-io/workshop-template
-  topics: daemon-labs, daemon-labs-io, workshop-template
-  private: true
+  name: docker-local-agents
+  description: "🤖 Autonomous Agents: Building Your Local AI \"Crew\""
+  homepage: https://github.com/daemon-labs-io/docker-local-agents
+  topics: daemon-labs, daemon-labs-io, docker-local-agents
+  private: false
   has_issues: true
   has_projects: false
   has_wiki: false
