@@ -33,4 +33,4 @@ RAG is preferred over fine-tuning when the knowledge changes frequently, when yo
 
 ## Getting started
 
-If you're following a workshop, return to the README for step-by-step instructions.
+If you're following a workshop, return to the readme for step-by-step instructions.

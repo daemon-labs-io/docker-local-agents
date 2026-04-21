@@ -18,7 +18,7 @@ Simple to run locally, good enough for workshop-scale data, runs happily in a Do
 
 ## Can I bring my own documents?
 
-Yes. Drop markdown files into `workshop/data/sample-docs/`, then rerun `python src/ingest.py` and `python src/embed.py`. The agents will pick them up via the knowledge-base tool.
+Yes. Drop Markdown files into `workshop/data/sample-docs/`, then rerun `python src/ingest.py` and `python src/embed.py`. The agents will pick them up via the knowledge-base tool.
 
 ## Can I use different models?
 

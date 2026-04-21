@@ -116,7 +116,7 @@ docker compose ps
 Import models from local files:
 
 ```shell
-docker compose exec ollama ollama create llama3.2:1b -f /root/workshop/Modelfile.llama3.2-1b
+docker compose exec ollama ollama create llama3.2:1b -f /root/workshop/Modelfile.llama3.2
 ```
 
 ```shell
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     print(result)
 ```
 
-### Run the agent
+### Run the basic agent
 
 ```shell
 docker compose run --rm python python src/agent_basic.py
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     print(result)
 ```
 
-### Run the agent
+### Run the filesystem agent
 
 ```shell
 docker compose run --rm python python src/agent_with_filesystem.py
