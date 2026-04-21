@@ -1,0 +1,41 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/bin/ollama list > /dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - 11434:11434
+    volumes:
+      - .:/root/workshop
+      - ollama_data:/root/.ollama
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - 8000:8000
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      IS_PERSISTENT: true
+      ANONYMIZED_TELEMETRY: false
+  python:
+    image: python:3.11-slim
+    profiles:
+      - python
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - python_packages:/usr/local/lib/python3.11/site-packages
+    working_dir: /app
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      CHROMA_HOST: chromadb
+volumes:
+  ollama_data:
+  chroma_data:
+  python_packages:

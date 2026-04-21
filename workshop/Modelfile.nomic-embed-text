@@ -1,0 +1,1 @@
+FROM /root/workshop/data/models/nomic-embed-text-v1.5.Q4_K_M.gguf
