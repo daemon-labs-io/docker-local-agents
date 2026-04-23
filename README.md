@@ -2,11 +2,15 @@
 
 ## 🛑 Prerequisites
 
-Before beginning this workshop, please ensure your environment is correctly set up by following the instructions in our prerequisites documentation:
+Work through the three steps below in order before starting the workshop itself.
+
+### General prerequisites
+
+Make sure your environment is set up by following our general prerequisites documentation:
 
 ➡️ **[Prerequisites guide](https://github.com/daemon-labs-io/prerequisites)**
 
-### Download the workshop code
+### Get the workshop code
 
 #### Open a terminal window
 
@@ -16,19 +20,7 @@ Before beginning this workshop, please ensure your environment is correctly set 
 
 #### Navigate to your repositories folder
 
-Change into the folder where you keep your repositories (create one first if you don't have a dedicated spot):
-
-**macOS / Linux / WSL**
-
-```shell
-cd ~/code
-```
-
-**Windows PowerShell / CMD**
-
-```shell
-cd %USERPROFILE%\code
-```
+Change into the folder where you normally keep your repositories (or wherever you'd like to put this one).
 
 #### Clone this repository
 
@@ -36,20 +28,20 @@ cd %USERPROFILE%\code
 git clone https://github.com/daemon-labs-io/docker-local-agents.git
 ```
 
-### Open the folder in your code editor
+#### Open the folder in your code editor
 
 ```shell
 code ./docker-local-agents
 ```
 
 > [!WARNING]
-> If this command doesn't work, open Visual Studio Code → Cmd+Shift+P → type "Install 'code' command in PATH" → press Enter.
+> If this command doesn't work, open Visual Studio Code → open the Command Palette (Cmd+Shift+P on macOS, Ctrl+Shift+P on Windows/Linux) → type "Install 'code' command in PATH" → press Enter.
 
 <!--  -->
 
 > [!TIP]
-> If you are using Visual Studio Code, we can now do everything from within the code editor.  
-> You can open the terminal pane via Terminal → New Terminal.
+> With Visual Studio Code open, you can do everything else from within the editor.  
+> Open the terminal pane via Terminal → New Terminal.
 
 ### Workshop-specific prerequisites
 
