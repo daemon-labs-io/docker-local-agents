@@ -3,5 +3,7 @@
 !.github/**/*
 !.gitignore
 !*.md
+!prerequisites
+!prerequisites/**/*
 !workshop
 !workshop/**

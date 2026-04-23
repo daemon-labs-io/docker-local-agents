@@ -10,9 +10,20 @@ Before beginning this workshop, please ensure your environment is correctly set 
 
 ### Clone this repository
 
+Open a terminal window, then change directory to where you'd like to store your repositories.
+
 ```shell
 git clone https://github.com/daemon-labs-io/docker-local-agents.git
 ```
+
+> [!TIP]
+> **Opening a terminal on your OS:**
+>
+> - **macOS:** open Spotlight (Cmd+Space), type "Terminal", press Enter. Your home directory is the default starting point.
+> - **Windows:** press the Windows key, type "Windows Terminal" (or "PowerShell"), press Enter. If you're using WSL, open your WSL distribution instead so paths and permissions behave as expected.
+> - **Linux:** Ctrl+Alt+T on most desktops, or open your distribution's terminal emulator of choice.
+>
+> Use `cd` to move into the folder where you keep your repositories (for example `cd ~/code` on macOS/Linux or `cd %USERPROFILE%\code` on Windows) before running `git clone`.
 
 ### Open the folder in your code editor
 
@@ -29,55 +40,12 @@ code ./docker-local-agents
 > If you are using Visual Studio Code, we can now do everything from within the code editor.  
 > You can open the terminal pane via Terminal → New Terminal.
 
-### In-person workshop prerequisites
+### Workshop-specific prerequisites
 
-> [!IMPORTANT]  
-> **Not at an in-person workshop? [Skip this section](#1-setup--start-services).**
+Choose the path that matches how you're taking the workshop:
 
-#### Pull Docker images from local mirror
-
-Pull the images:
-
-```shell
-docker pull registry.labs.dae.mn/ollama:latest
-```
-
-<!--  -->
-
-```shell
-docker pull registry.labs.dae.mn/chroma:latest
-```
-
-<!--  -->
-
-```shell
-docker pull registry.labs.dae.mn/python:3.11-slim
-```
-
-<!--  -->
-
-```shell
-docker pull registry.labs.dae.mn/curl:latest
-```
-
-Retag to original names for use in docker-compose:
-
-```shell
-docker tag registry.labs.dae.mn/ollama:latest ollama/ollama:latest
-docker tag registry.labs.dae.mn/chroma:latest chromadb/chroma:latest
-docker tag registry.labs.dae.mn/python:3.11-slim python:3.11-slim
-docker tag registry.labs.dae.mn/curl:latest curlimages/curl:latest
-```
-
-#### Download models
-
-```shell
-docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/llama-3.2-1b-instruct-Q4_K_M.gguf https://files.labs.dae.mn/llama-3.2-1b-instruct-Q4_K_M.gguf
-```
-
-```shell
-docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/nomic-embed-text-v1.5.Q4_K_M.gguf https://files.labs.dae.mn/nomic-embed-text-v1.5.Q4_K_M.gguf
-```
+- **At an in-person workshop?** Follow the [in-person workshop prerequisites](./prerequisites/WORKSHOP.md).
+- **Working through this on your own (at home or at work)?** Follow the [individual prerequisites](./prerequisites/INDIVIDUAL.md).
 
 ---
 
