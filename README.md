@@ -8,22 +8,35 @@ Before beginning this workshop, please ensure your environment is correctly set 
 
 ➡️ **[Prerequisites guide](https://github.com/daemon-labs-io/prerequisites)**
 
-### Clone this repository
+### Download the workshop code
 
-Open a terminal window, then change directory to where you'd like to store your repositories.
+#### Open a terminal window
+
+- **macOS:** open Spotlight (Cmd+Space), type "Terminal", press Enter.
+- **Windows:** press the Windows key, type "Windows Terminal" (or "PowerShell"), press Enter. If you're using WSL, open your WSL distribution instead so paths and permissions behave as expected.
+- **Linux:** Ctrl+Alt+T on most desktops, or open your distribution's terminal emulator of choice.
+
+#### Navigate to your repositories folder
+
+Change into the folder where you keep your repositories (create one first if you don't have a dedicated spot):
+
+**macOS / Linux / WSL**
+
+```shell
+cd ~/code
+```
+
+**Windows PowerShell / CMD**
+
+```shell
+cd %USERPROFILE%\code
+```
+
+#### Clone this repository
 
 ```shell
 git clone https://github.com/daemon-labs-io/docker-local-agents.git
 ```
-
-> [!TIP]
-> **Opening a terminal on your OS:**
->
-> - **macOS:** open Spotlight (Cmd+Space), type "Terminal", press Enter. Your home directory is the default starting point.
-> - **Windows:** press the Windows key, type "Windows Terminal" (or "PowerShell"), press Enter. If you're using WSL, open your WSL distribution instead so paths and permissions behave as expected.
-> - **Linux:** Ctrl+Alt+T on most desktops, or open your distribution's terminal emulator of choice.
->
-> Use `cd` to move into the folder where you keep your repositories (for example `cd ~/code` on macOS/Linux or `cd %USERPROFILE%\code` on Windows) before running `git clone`.
 
 ### Open the folder in your code editor
 
