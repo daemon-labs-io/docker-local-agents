@@ -1,83 +1,69 @@
 # 🤖 Autonomous Agents: Building Your Local AI Crew
 
----
-
 ## 🛑 Prerequisites
 
-Before beginning this workshop, please ensure your environment is correctly set up by following the instructions in our prerequisites documentation:
+Work through the three steps below in order before starting the workshop itself.
+
+### General prerequisites
+
+Make sure your environment is set up by following our general prerequisites documentation:
 
 ➡️ **[Prerequisites guide](https://github.com/daemon-labs-io/prerequisites)**
 
-### Clone this repository
+### Get the workshop code
+
+#### Open a terminal window
+
+- **macOS:** open Spotlight (Cmd+Space), type "Terminal", press Enter.
+- **Windows:** press the Windows key, type "Windows Terminal" (or "PowerShell"), press Enter. If you're using WSL, open your WSL distribution instead so paths and permissions behave as expected.
+- **Linux:** Ctrl+Alt+T on most desktops, or open your distribution's terminal emulator of choice.
+
+#### Navigate to your repositories folder
+
+We recommend creating a `daemon-labs` folder in your home directory so everyone in the room is working from the same place (and any future Daemon workshop repos live alongside this one):
+
+- **macOS / Linux / WSL**
+
+  ```shell
+  mkdir -p ~/daemon-labs && cd ~/daemon-labs
+  ```
+
+- **Windows PowerShell**
+
+  ```shell
+  mkdir $HOME\daemon-labs -Force; cd $HOME\daemon-labs
+  ```
+
+> [!TIP]
+> Prefer to keep your own convention? `cd` into whichever folder you normally use for repositories — the rest of the workshop works the same either way.
+
+#### Clone this repository
 
 ```shell
 git clone https://github.com/daemon-labs-io/docker-local-agents.git
 ```
 
-### Open the folder in your code editor
+#### Open the folder in your code editor
 
 ```shell
 code ./docker-local-agents
 ```
 
 > [!WARNING]
-> If this command doesn't work, open Visual Studio Code → Cmd+Shift+P → type "Install 'code' command in PATH" → press Enter.
+> If this command doesn't work, open Visual Studio Code → open the Command Palette (Cmd+Shift+P on macOS, Ctrl+Shift+P on Windows/Linux) → type "Install 'code' command in PATH" → press Enter.
 
 <!--  -->
 
 > [!TIP]
-> If you are using Visual Studio Code, we can now do everything from within the code editor.  
-> You can open the terminal pane via Terminal → New Terminal.
+> With Visual Studio Code open, you can do everything else from within the editor.  
+> Open the terminal pane via Terminal → New Terminal.
 
-### In-person workshop prerequisites
+### Workshop-specific prerequisites
 
-> [!IMPORTANT]  
-> **Not at an in-person workshop? [Skip this section](#1-setup--start-services).**
+Choose the path that matches how you're taking the workshop:
 
-#### Pull Docker images from local mirror
-
-Pull the images:
-
-```shell
-docker pull registry.labs.dae.mn/ollama:latest
-```
-
-<!--  -->
-
-```shell
-docker pull registry.labs.dae.mn/chroma:latest
-```
-
-<!--  -->
-
-```shell
-docker pull registry.labs.dae.mn/python:3.11-slim
-```
-
-<!--  -->
-
-```shell
-docker pull registry.labs.dae.mn/curl:latest
-```
-
-Retag to original names for use in docker-compose:
-
-```shell
-docker tag registry.labs.dae.mn/ollama:latest ollama/ollama:latest
-docker tag registry.labs.dae.mn/chroma:latest chromadb/chroma:latest
-docker tag registry.labs.dae.mn/python:3.11-slim python:3.11-slim
-docker tag registry.labs.dae.mn/curl:latest curlimages/curl:latest
-```
-
-#### Download models
-
-```shell
-docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/llama-3.2-1b-instruct-Q4_K_M.gguf https://files.labs.dae.mn/llama-3.2-1b-instruct-Q4_K_M.gguf
-```
-
-```shell
-docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/nomic-embed-text-v1.5.Q4_K_M.gguf https://files.labs.dae.mn/nomic-embed-text-v1.5.Q4_K_M.gguf
-```
+- **At an in-person workshop?** Follow the [in-person workshop prerequisites](./prerequisites/WORKSHOP.md).
+- **Working through this on your own (at home or at work)?** Follow the [individual prerequisites](./prerequisites/INDIVIDUAL.md).
 
 ---
 
