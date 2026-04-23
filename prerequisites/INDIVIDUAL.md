@@ -1,8 +1,8 @@
 # 🛑 Prerequisites - Individual
 
 > [!IMPORTANT]  
-> **At an in-person workshop?**
-> [Continue to workshop prerequisites](./WORKSHOP.md)
+> **At an in-person workshop?**  
+> [Continue to workshop prerequisites](./WORKSHOP.md)  
 > [Continue with the workshop](../README.md)
 
 ## Pull Docker images

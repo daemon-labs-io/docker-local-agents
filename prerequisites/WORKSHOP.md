@@ -1,8 +1,8 @@
 # 🛑 Prerequisites - Workshop
 
 > [!IMPORTANT]  
-> **Not at an in-person workshop?**
-> [Continue to individual prerequisites](./INDIVIDUAL.md)
+> **Not at an in-person workshop?**  
+> [Continue to individual prerequisites](./INDIVIDUAL.md)  
 > [Continue with the workshop](../README.md)
 
 ## Pull Docker images from local mirror
