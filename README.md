@@ -22,13 +22,13 @@ Make sure your environment is set up by following our general prerequisites docu
 
 We recommend creating a `daemon-labs` folder in your home directory so everyone in the room is working from the same place (and any future Daemon workshop repos live alongside this one):
 
-**macOS / Linux / WSL**
+- **macOS / Linux / WSL**
 
 ```shell
 mkdir -p ~/daemon-labs && cd ~/daemon-labs
 ```
 
-**Windows PowerShell**
+- **Windows PowerShell**
 
 ```shell
 mkdir $HOME\daemon-labs -Force; cd $HOME\daemon-labs
