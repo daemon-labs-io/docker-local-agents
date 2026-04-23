@@ -24,15 +24,15 @@ We recommend creating a `daemon-labs` folder in your home directory so everyone 
 
 - **macOS / Linux / WSL**
 
-```shell
-mkdir -p ~/daemon-labs && cd ~/daemon-labs
-```
+  ```shell
+  mkdir -p ~/daemon-labs && cd ~/daemon-labs
+  ```
 
 - **Windows PowerShell**
 
-```shell
-mkdir $HOME\daemon-labs -Force; cd $HOME\daemon-labs
-```
+  ```shell
+  mkdir $HOME\daemon-labs -Force; cd $HOME\daemon-labs
+  ```
 
 > [!TIP]
 > Prefer to keep your own convention? `cd` into whichever folder you normally use for repositories — the rest of the workshop works the same either way.
