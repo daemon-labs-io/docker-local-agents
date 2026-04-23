@@ -20,7 +20,22 @@ Make sure your environment is set up by following our general prerequisites docu
 
 #### Navigate to your repositories folder
 
-Change into the folder where you normally keep your repositories (or wherever you'd like to put this one).
+We recommend creating a `daemon-labs` folder in your home directory so everyone in the room is working from the same place (and any future Daemon workshop repos live alongside this one):
+
+**macOS / Linux / WSL**
+
+```shell
+mkdir -p ~/daemon-labs && cd ~/daemon-labs
+```
+
+**Windows PowerShell**
+
+```shell
+mkdir $HOME\daemon-labs -Force; cd $HOME\daemon-labs
+```
+
+> [!TIP]
+> Prefer to keep your own convention? `cd` into whichever folder you normally use for repositories — the rest of the workshop works the same either way.
 
 #### Clone this repository
 
