@@ -2,8 +2,7 @@
 
 > [!IMPORTANT]  
 > **At an in-person workshop?**  
-> [Continue to workshop prerequisites](./WORKSHOP.md)  
-> [Continue with the workshop](../README.md)
+> [Continue to workshop prerequisites](./WORKSHOP.md)
 
 ## Pull Docker images
 
@@ -40,3 +39,6 @@ docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -L -
 ```shell
 docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -L -o /data/models/nomic-embed-text-v1.5.Q4_K_M.gguf "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/main/nomic-embed-text-v1.5.Q4_K_M.gguf?download=true"
 ```
+
+> [!IMPORTANT]  
+> Once you've finished, [continue with the workshop](../README.md)
