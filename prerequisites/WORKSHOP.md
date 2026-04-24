@@ -1,9 +1,8 @@
 # 🛑 Prerequisites - Workshop
 
 > [!IMPORTANT]  
-> **Not at an in-person workshop?**  
-> [Continue to individual prerequisites](./INDIVIDUAL.md)  
-> [Continue with the workshop](../README.md)
+> **Not at an in-person workshop or having issues?**  
+> [Continue to individual prerequisites](./INDIVIDUAL.md)
 
 ## Pull Docker images from local mirror
 
@@ -49,3 +48,7 @@ docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /
 ```shell
 docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/nomic-embed-text-v1.5.Q4_K_M.gguf https://files.labs.dae.mn/nomic-embed-text-v1.5.Q4_K_M.gguf
 ```
+
+> [!IMPORTANT]  
+> Once you've finished, [continue with the workshop](../README.md).  
+> If you're having issues, [try the individual prerequisites](./INDIVIDUAL.md).
