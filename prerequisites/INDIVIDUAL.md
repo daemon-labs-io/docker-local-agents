@@ -41,4 +41,4 @@ docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -L -
 ```
 
 > [!IMPORTANT]  
-> Once you've finished, [continue with the workshop](../README.md)
+> Once you've finished, [continue with the workshop](../README.md).
