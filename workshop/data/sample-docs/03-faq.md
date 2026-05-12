@@ -12,11 +12,11 @@ CrewAI is opinionated enough to get a working multi-agent system running in minu
 It has role-based agents that map naturally onto team structures.
 Alternatives include LangGraph, which is more flexible with a steeper learning curve, and AutoGen, which is broader but less focused on crews.
 
-## Why llama3.2:1b?
+## Why qwen2.5:1.5b?
 
-It hits the sweet spot of being small (~1.3 GB quantised), so it downloads quickly over a venue network and runs on nearly any laptop including 8 GB CPU-only machines, while still being fine-tuned by Meta for function calling.
+It hits the sweet spot of being small (~1.1 GB quantised), so it downloads quickly over a venue network and runs on nearly any laptop including 8 GB CPU-only machines, while still being fine-tuned by the Qwen team for function calling.
 That last bit matters: smaller models without function-calling training (such as tinyllama) frequently ignore tools and fabricate answers, which defeats the point of agent work.
-For richer reasoning on more capable hardware, `llama3.2:3b` is a solid step up.
+For richer reasoning on more capable hardware, `qwen2.5:3b` or `qwen2.5:7b` are solid steps up.
 
 ## Why ChromaDB?
 

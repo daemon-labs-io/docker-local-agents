@@ -4,7 +4,7 @@ from pathlib import Path
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 sys.path.insert(0, str(Path(__file__).parent))
-import workshop.src.config as config
+import config
 
 
 def load_documents():

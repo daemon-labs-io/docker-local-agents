@@ -102,7 +102,7 @@ docker compose ps
 Import models from local files:
 
 ```shell
-docker compose exec ollama ollama create llama3.2:1b -f /root/workshop/Modelfile.llama3.2
+docker compose exec ollama ollama create qwen2.5:1.5b -f /root/workshop/Modelfile.qwen2.5
 ```
 
 ```shell
@@ -110,7 +110,7 @@ docker compose exec ollama ollama create nomic-embed-text -f /root/workshop/Mode
 ```
 
 > [!TIP]
-> **Hardware tier expectations:** `llama3.2:1b` is around 1.3 GB and runs comfortably on 8 GB CPU-only laptops. GPU-accelerated machines (Apple Silicon, Nvidia) will be quicker but the workshop works fine on either tier.
+> **Hardware tier expectations:** `qwen2.5:1.5b` is around 1.1 GB and runs comfortably on 8 GB CPU-only laptops. GPU-accelerated machines (Apple Silicon, Nvidia) will be quicker but the workshop works fine on either tier.
 
 Install Python dependencies:
 
@@ -160,7 +160,7 @@ docker compose exec ollama ollama list
 ```
 
 > [!NOTE]
-> You should see `llama3.2:1b` and `nomic-embed-text` listed. We use `llama3.2:1b` because it's small enough for any laptop while being properly fine-tuned for tool calling, which is the heart of agent work.
+> You should see `qwen2.5:1.5b` and `nomic-embed-text` listed. We use `qwen2.5:1.5b` because it's small enough for any laptop while being properly fine-tuned for tool calling, which is the heart of agent work.
 
 ---
 
@@ -194,12 +194,17 @@ docker compose run --rm python pip install -r src/requirements.txt
 Create `src/agent_basic.py`:
 
 ```python
-import os
+import sys
+from pathlib import Path
+
 from crewai import Agent, Task, Crew, LLM
 
+sys.path.insert(0, str(Path(__file__).parent))
+import config
+
 llm = LLM(
-    model="ollama/llama3.2:1b",
-    base_url=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
+    model=f"ollama/{config.GENERATION_MODEL}",
+    base_url=config.OLLAMA_BASE_URL,
 )
 
 researcher = Agent(
@@ -261,30 +266,32 @@ docker compose run --rm python python src/agent_basic.py
 Create `src/agent_with_filesystem.py`:
 
 ```python
-import os
+import sys
 from pathlib import Path
+
 from crewai import Agent, Task, Crew, LLM
 from crewai.tools import tool
 
-llm = LLM(
-    model="ollama/llama3.2:1b",
-    base_url=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
-)
+sys.path.insert(0, str(Path(__file__).parent))
+import config
 
-SAMPLE_DOCS = Path("/app/data/sample-docs")
+llm = LLM(
+    model=f"ollama/{config.GENERATION_MODEL}",
+    base_url=config.OLLAMA_BASE_URL,
+)
 
 
 @tool("List Sample Documents")
 def list_documents() -> str:
     """List every markdown file available in the sample documents directory."""
-    files = sorted(f.name for f in SAMPLE_DOCS.glob("*.md"))
+    files = sorted(f.name for f in config.DATA_DIR.glob("*.md"))
     return "\n".join(files) if files else "No documents found."
 
 
 @tool("Read Document")
 def read_document(filename: str) -> str:
     """Read the full contents of a named document from the sample documents directory."""
-    path = SAMPLE_DOCS / filename
+    path = config.DATA_DIR / filename
     if not path.exists():
         return f"File not found: {filename}"
     return path.read_text(encoding="utf-8")
@@ -350,22 +357,27 @@ The filesystem tools in section 3 only work when you know exactly which file to 
 Create `src/agent_with_rag.py`:
 
 ```python
-import os
+import sys
+from pathlib import Path
+
 import requests
 import chromadb
 from crewai import Agent, Task, Crew, LLM
 from crewai.tools import tool
 
+sys.path.insert(0, str(Path(__file__).parent))
+import config
+
 llm = LLM(
-    model="ollama/llama3.2:1b",
-    base_url=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
+    model=f"ollama/{config.GENERATION_MODEL}",
+    base_url=config.OLLAMA_BASE_URL,
 )
 
 
 def get_embedding(text: str) -> list[float]:
     response = requests.post(
-        f"{os.environ['OLLAMA_BASE_URL']}/api/embeddings",
-        json={"model": "nomic-embed-text", "prompt": text},
+        f"{config.OLLAMA_BASE_URL}/api/embeddings",
+        json={"model": config.EMBEDDING_MODEL, "prompt": text},
     )
     response.raise_for_status()
     return response.json()["embedding"]
@@ -374,8 +386,8 @@ def get_embedding(text: str) -> list[float]:
 @tool("Search Knowledge Base")
 def search_knowledge_base(query: str) -> str:
     """Search the internal knowledge base and return the most relevant excerpts."""
-    client = chromadb.HttpClient(host=os.environ["CHROMA_HOST"], port=8000)
-    collection = client.get_collection(name="workshop-docs")
+    client = chromadb.HttpClient(host=config.CHROMA_HOST, port=8000)
+    collection = client.get_collection(name=config.COLLECTION_NAME)
     results = collection.query(query_embeddings=[get_embedding(query)], n_results=3)
 
     chunks = results.get("documents", [[]])[0]
@@ -438,22 +450,27 @@ Edit the `question` input in the script, or take a minute now to pick a question
 Create `src/crew.py`:
 
 ```python
-import os
+import sys
+from pathlib import Path
+
 import requests
 import chromadb
 from crewai import Agent, Task, Crew, LLM, Process
 from crewai.tools import tool
 
+sys.path.insert(0, str(Path(__file__).parent))
+import config
+
 llm = LLM(
-    model="ollama/llama3.2:1b",
-    base_url=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
+    model=f"ollama/{config.GENERATION_MODEL}",
+    base_url=config.OLLAMA_BASE_URL,
 )
 
 
 def get_embedding(text: str) -> list[float]:
     response = requests.post(
-        f"{os.environ['OLLAMA_BASE_URL']}/api/embeddings",
-        json={"model": "nomic-embed-text", "prompt": text},
+        f"{config.OLLAMA_BASE_URL}/api/embeddings",
+        json={"model": config.EMBEDDING_MODEL, "prompt": text},
     )
     response.raise_for_status()
     return response.json()["embedding"]
@@ -462,8 +479,8 @@ def get_embedding(text: str) -> list[float]:
 @tool("Search Knowledge Base")
 def search_knowledge_base(query: str) -> str:
     """Search the internal knowledge base and return the most relevant excerpts."""
-    client = chromadb.HttpClient(host=os.environ["CHROMA_HOST"], port=8000)
-    collection = client.get_collection(name="workshop-docs")
+    client = chromadb.HttpClient(host=config.CHROMA_HOST, port=8000)
+    collection = client.get_collection(name=config.COLLECTION_NAME)
     results = collection.query(query_embeddings=[get_embedding(query)], n_results=3)
     chunks = results.get("documents", [[]])[0]
     sources = [m.get("source", "unknown") for m in results.get("metadatas", [[]])[0]]

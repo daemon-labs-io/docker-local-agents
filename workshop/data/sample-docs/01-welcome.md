@@ -6,7 +6,7 @@ This document introduces the local AI workshop system and the hardware you'll ne
 
 A local AI stack running on your own machine. You get:
 
-- An LLM for generation (`llama3.2:1b` via Ollama)
+- An LLM for generation (`qwen2.5:1.5b` via Ollama)
 - An embedding model (`nomic-embed-text` via Ollama)
 - A vector database (ChromaDB) for semantic search
 - Orchestration via Python scripts and CrewAI

@@ -5,7 +5,7 @@ import chromadb
 import requests
 
 sys.path.insert(0, str(Path(__file__).parent))
-import workshop.src.config as config
+import config
 
 
 def get_embedding(text: str) -> list[float]:
@@ -45,7 +45,7 @@ def store_embeddings(chunks):
 
 
 def main():
-    from workshop.src.ingest import chunk_documents, load_documents
+    from ingest import chunk_documents, load_documents
 
     print("Loading documents...")
     documents = load_documents()

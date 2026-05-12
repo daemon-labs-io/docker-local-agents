@@ -42,7 +42,7 @@ docker tag registry.labs.dae.mn/curl:latest curlimages/curl:latest
 ## Download models
 
 ```shell
-docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/llama-3.2-1b-instruct-Q4_K_M.gguf https://files.labs.dae.mn/llama-3.2-1b-instruct-Q4_K_M.gguf
+docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/qwen2.5-1.5b-instruct-Q4_K_M.gguf https://files.labs.dae.mn/qwen2.5-1.5b-instruct-Q4_K_M.gguf
 ```
 
 ```shell
