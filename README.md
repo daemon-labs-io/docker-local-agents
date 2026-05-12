@@ -102,7 +102,7 @@ docker compose ps
 Import models from local files:
 
 ```shell
-docker compose exec ollama ollama create qwen2.5:1.5b -f /root/workshop/Modelfile.qwen2.5
+docker compose exec ollama ollama create phi3:mini -f /root/workshop/Modelfile.phi3
 ```
 
 ```shell
@@ -110,7 +110,7 @@ docker compose exec ollama ollama create nomic-embed-text -f /root/workshop/Mode
 ```
 
 > [!TIP]
-> **Hardware tier expectations:** `qwen2.5:1.5b` is around 1.1 GB and runs comfortably on 8 GB CPU-only laptops. GPU-accelerated machines (Apple Silicon, Nvidia) will be quicker but the workshop works fine on either tier.
+> **Hardware tier expectations:** `phi3:mini` is around 2.4 GB and runs comfortably on 8 GB CPU-only laptops with responsive inference times (8-15 seconds per task). GPU-accelerated machines (Apple Silicon, Nvidia) will be faster but the workshop works well on CPU-only tier.
 
 Install Python dependencies:
 
@@ -160,7 +160,7 @@ docker compose exec ollama ollama list
 ```
 
 > [!NOTE]
-> You should see `qwen2.5:1.5b` and `nomic-embed-text` listed. We use `qwen2.5:1.5b` because it's small enough for any laptop while being properly fine-tuned for tool calling, which is the heart of agent work.
+> You should see `phi3:mini` and `nomic-embed-text` listed. We use `phi3:mini` because it balances model quality with fast inference on CPU-only machines, completing agent tasks in 8-15 seconds.
 
 ---
 
@@ -194,6 +194,7 @@ docker compose run --rm python pip install -r src/requirements.txt
 Create `src/agent_basic.py`:
 
 ```python
+import time
 import sys
 from pathlib import Path
 
@@ -230,8 +231,15 @@ task = Task(
 crew = Crew(agents=[researcher], tasks=[task], verbose=True)
 
 if __name__ == "__main__":
+    print("🟢 Starting crew execution...", flush=True)
+    sys.stdout.flush()
+
+    start_time = time.time()
     result = crew.kickoff()
-    print("\n=== RESULT ===\n")
+    elapsed = time.time() - start_time
+
+    print(f"\n✅ Completed in {elapsed:.1f} seconds\n")
+    print("=== RESULT ===\n")
     print(result)
 ```
 
@@ -253,108 +261,17 @@ docker compose run --rm python python src/agent_basic.py
 <!--  -->
 
 > [!TIP]
-> First runs can take 30 to 60 seconds while the model warms up. Subsequent runs are faster.
+> With `phi3:mini`, expect 8-15 seconds per task. The timing is printed at the end of execution.
 
 ---
 
-## 3. Tool binding: your filesystem
+## 3. Enhanced context: Providing knowledge to agents
 
-**Goal:** Give the agent tools that read from your local filesystem and watch it decide when to use them.
+**Goal:** Show how agents reason over provided context. This demonstrates the information retrieval pattern without tool calling.
 
-### Create an agent with filesystem tools
+### Create an agent with knowledge context
 
-Create `src/agent_with_filesystem.py`:
-
-```python
-import sys
-from pathlib import Path
-
-from crewai import Agent, Task, Crew, LLM
-from crewai.tools import tool
-
-sys.path.insert(0, str(Path(__file__).parent))
-import config
-
-llm = LLM(
-    model=f"ollama/{config.GENERATION_MODEL}",
-    base_url=config.OLLAMA_BASE_URL,
-)
-
-
-@tool("List Sample Documents")
-def list_documents() -> str:
-    """List every markdown file available in the sample documents directory."""
-    files = sorted(f.name for f in config.DATA_DIR.glob("*.md"))
-    return "\n".join(files) if files else "No documents found."
-
-
-@tool("Read Document")
-def read_document(filename: str) -> str:
-    """Read the full contents of a named document from the sample documents directory."""
-    path = config.DATA_DIR / filename
-    if not path.exists():
-        return f"File not found: {filename}"
-    return path.read_text(encoding="utf-8")
-
-
-analyst = Agent(
-    role="Document Analyst",
-    goal="Produce accurate summaries of local documents",
-    backstory=(
-        "You are a precise analyst. You always list the available documents first, "
-        "then read the ones relevant to your task before summarising. You never "
-        "invent content that isn't in the document."
-    ),
-    llm=llm,
-    tools=[list_documents, read_document],
-    verbose=True,
-)
-
-task = Task(
-    description="Summarise the welcome document for a new user of this system.",
-    expected_output="A 3-bullet summary of the welcome document.",
-    agent=analyst,
-)
-
-crew = Crew(agents=[analyst], tasks=[task], verbose=True)
-
-if __name__ == "__main__":
-    result = crew.kickoff()
-    print("\n=== RESULT ===\n")
-    print(result)
-```
-
-### Run the filesystem agent
-
-```shell
-docker compose run --rm python python src/agent_with_filesystem.py
-```
-
-> [!NOTE]
-> Watch the verbose output. You should see the agent:
->
-> 1. Call `List Sample Documents` to discover what's available
-> 2. Call `Read Document` on the welcome file
-> 3. Produce its summary from the actual file contents
->
-> This is tool composition: the agent decides the order of tool calls based on the task.
-
-<!--  -->
-
-> [!WARNING]
-> Small models sometimes skip `list_documents` and guess a filename. If the agent fails to find the file, run it again. For production use, you'd add a system prompt or tool description that forces the list-then-read pattern.
-
----
-
-## 4. Tool binding: local APIs
-
-**Goal:** Go beyond the filesystem. Give the agent a tool that calls a local HTTP API, in this case the ChromaDB knowledge base.
-
-The filesystem tools in section 3 only work when you know exactly which file to read. Real agents often need to **search** rather than **fetch**. That's what a RAG tool does: it wraps a local API call (ChromaDB) behind a single semantic search function the agent can call.
-
-### Add a RAG tool
-
-Create `src/agent_with_rag.py`:
+Create `src/agent_with_rag_context.py`:
 
 ```python
 import sys
@@ -363,18 +280,13 @@ from pathlib import Path
 import requests
 import chromadb
 from crewai import Agent, Task, Crew, LLM
-from crewai.tools import tool
 
 sys.path.insert(0, str(Path(__file__).parent))
 import config
 
-llm = LLM(
-    model=f"ollama/{config.GENERATION_MODEL}",
-    base_url=config.OLLAMA_BASE_URL,
-)
-
 
 def get_embedding(text: str) -> list[float]:
+    """Generate an embedding for a text query."""
     response = requests.post(
         f"{config.OLLAMA_BASE_URL}/api/embeddings",
         json={"model": config.EMBEDDING_MODEL, "prompt": text},
@@ -383,71 +295,99 @@ def get_embedding(text: str) -> list[float]:
     return response.json()["embedding"]
 
 
-@tool("Search Knowledge Base")
-def search_knowledge_base(query: str) -> str:
-    """Search the internal knowledge base and return the most relevant excerpts."""
+def search_knowledge_base(query: str, n_results: int = 3) -> str:
+    """Search the knowledge base and return formatted results."""
     client = chromadb.HttpClient(host=config.CHROMA_HOST, port=8000)
     collection = client.get_collection(name=config.COLLECTION_NAME)
-    results = collection.query(query_embeddings=[get_embedding(query)], n_results=3)
+    results = collection.query(query_embeddings=[get_embedding(query)], n_results=n_results)
 
     chunks = results.get("documents", [[]])[0]
     sources = [m.get("source", "unknown") for m in results.get("metadatas", [[]])[0]]
+
     if not chunks:
-        return "No results found."
+        return "No relevant information found in knowledge base."
 
-    return "\n\n".join(
-        f"[source: {source}]\n{chunk}" for source, chunk in zip(sources, chunks)
-    )
+    formatted = "=== KNOWLEDGE BASE RESULTS ===\n\n"
+    for i, (source, chunk) in enumerate(zip(sources, chunks), 1):
+        formatted += f"[{i}] From {source}:\n{chunk}\n\n"
 
+    return formatted
+
+
+llm = LLM(
+    model=f"ollama/{config.GENERATION_MODEL}",
+    base_url=config.OLLAMA_BASE_URL,
+)
 
 support_agent = Agent(
     role="Support Specialist",
-    goal="Answer user questions accurately using only the internal knowledge base",
+    goal="Answer user questions accurately using the provided knowledge base excerpts",
     backstory=(
-        "You are a support specialist. You never guess. You always search the "
-        "knowledge base first, and you cite the source of every fact."
+        "You are a helpful support specialist. You answer questions by carefully reading "
+        "the provided knowledge base excerpts. You cite the source of every fact. "
+        "If the knowledge base doesn't contain the answer, you say so honestly."
     ),
     llm=llm,
-    tools=[search_knowledge_base],
     verbose=True,
 )
 
-task = Task(
-    description="Answer the following question using the knowledge base: {question}",
-    expected_output="A clear answer with sources cited in [source: filename] format.",
-    agent=support_agent,
-)
-
-crew = Crew(agents=[support_agent], tasks=[task], verbose=True)
-
 if __name__ == "__main__":
-    result = crew.kickoff(inputs={"question": "What are the hardware requirements?"})
-    print("\n=== RESULT ===\n")
+    question = "What are the hardware requirements?"
+
+    print(f"📚 Searching knowledge base for: '{question}'\n")
+
+    # Retrieve relevant context upfront
+    knowledge_context = search_knowledge_base(question, n_results=3)
+
+    print(knowledge_context)
+    print("=" * 80)
+    print("🤖 Agent analyzing knowledge base...\n")
+
+    # Create task with context already included
+    task = Task(
+        description=(
+            f"Based on the knowledge base excerpts below, answer this question: {question}\n\n"
+            f"{knowledge_context}\n"
+            f"Remember to cite which source each fact comes from."
+        ),
+        expected_output="A clear answer with sources cited in [source: filename] format.",
+        agent=support_agent,
+    )
+
+    crew = Crew(agents=[support_agent], tasks=[task], verbose=True)
+
+    result = crew.kickoff()
+    print("\n=== FINAL ANSWER ===\n")
     print(result)
 ```
 
-### Run the RAG-enabled agent
+### Run the context-aware agent
 
 ```shell
-docker compose run --rm python python src/agent_with_rag.py
+docker compose run --rm python python src/agent_with_rag_context.py
 ```
 
 > [!NOTE]
-> In the verbose output, you should see the agent calling `Search Knowledge Base`, receiving excerpts, then weaving them into its final answer with source citations.
-
-### Try different questions
-
-Edit the `question` input in the script, or take a minute now to pick a question relevant to your own work and see how the agent handles it.
+> Observe the full pipeline:
+>
+> 1. **Retrieval**: Knowledge base is searched (you see the excerpts)
+> 2. **Context provision**: Results are given to the agent
+> 3. **Reasoning**: Agent reasons over the provided context
+> 4. **Citation**: Agent cites sources in its answer
+>
+> This is how RAG works at its core: retrieve relevant context, provide it to the agent, let the agent reason over it. No tool calling needed.
 
 ---
 
-## 5. Building a crew
+## 4. Knowledge augmentation: Multi-agent reasoning with RAG
 
-**Goal:** Two agents, each with a distinct role, collaborating on a multi-step task.
+**Goal:** Build a multi-agent crew where agents collaborate, with both agents reasoning over pre-retrieved knowledge base context.
 
-### Create a multi-agent crew
+This section extends the RAG pattern to a **multi-agent workflow**: a Researcher agent gathers facts, and an Editor agent transforms them into polished prose. Both work with the same retrieved knowledge base context.
 
-Create `src/crew.py`:
+### Build a multi-agent crew with shared context
+
+Create `src/crew_with_rag_context.py`:
 
 ```python
 import sys
@@ -456,18 +396,13 @@ from pathlib import Path
 import requests
 import chromadb
 from crewai import Agent, Task, Crew, LLM, Process
-from crewai.tools import tool
 
 sys.path.insert(0, str(Path(__file__).parent))
 import config
 
-llm = LLM(
-    model=f"ollama/{config.GENERATION_MODEL}",
-    base_url=config.OLLAMA_BASE_URL,
-)
-
 
 def get_embedding(text: str) -> list[float]:
+    """Generate an embedding for a text query."""
     response = requests.post(
         f"{config.OLLAMA_BASE_URL}/api/embeddings",
         json={"model": config.EMBEDDING_MODEL, "prompt": text},
@@ -476,27 +411,35 @@ def get_embedding(text: str) -> list[float]:
     return response.json()["embedding"]
 
 
-@tool("Search Knowledge Base")
-def search_knowledge_base(query: str) -> str:
-    """Search the internal knowledge base and return the most relevant excerpts."""
+def search_knowledge_base(query: str, n_results: int = 3) -> str:
+    """Search the knowledge base and return formatted results."""
     client = chromadb.HttpClient(host=config.CHROMA_HOST, port=8000)
     collection = client.get_collection(name=config.COLLECTION_NAME)
-    results = collection.query(query_embeddings=[get_embedding(query)], n_results=3)
+    results = collection.query(query_embeddings=[get_embedding(query)], n_results=n_results)
+
     chunks = results.get("documents", [[]])[0]
     sources = [m.get("source", "unknown") for m in results.get("metadatas", [[]])[0]]
-    if not chunks:
-        return "No results found."
-    return "\n\n".join(
-        f"[source: {source}]\n{chunk}" for source, chunk in zip(sources, chunks)
-    )
 
+    if not chunks:
+        return "No relevant information found in knowledge base."
+
+    formatted = "=== KNOWLEDGE BASE RESULTS ===\n\n"
+    for i, (source, chunk) in enumerate(zip(sources, chunks), 1):
+        formatted += f"[{i}] From {source}:\n{chunk}\n\n"
+
+    return formatted
+
+
+llm = LLM(
+    model=f"ollama/{config.GENERATION_MODEL}",
+    base_url=config.OLLAMA_BASE_URL,
+)
 
 researcher = Agent(
     role="Researcher",
-    goal="Gather accurate facts from the knowledge base",
-    backstory="You find facts. You cite sources. You never speculate.",
+    goal="Gather accurate facts from the knowledge base and organize them",
+    backstory="You are a meticulous researcher who finds facts and cites sources. You never speculate.",
     llm=llm,
-    tools=[search_knowledge_base],
     verbose=True,
 )
 
@@ -504,78 +447,187 @@ editor = Agent(
     role="Editor",
     goal="Turn research notes into a polished, reader-friendly briefing",
     backstory=(
-        "You take raw research notes and shape them into clear prose for a "
-        "technical audience. You preserve every source citation from the original "
-        "research."
+        "You take raw research notes and shape them into clear prose for a technical audience. "
+        "You preserve every source citation from the original research."
     ),
     llm=llm,
     verbose=True,
 )
 
-research_task = Task(
-    description="Research the following topic using the knowledge base: {topic}",
-    expected_output="A bulleted list of facts with [source: filename] citations.",
-    agent=researcher,
+if __name__ == "__main__":
+    topic = "security and password policy"
+
+    print(f"📚 Searching knowledge base for: '{topic}'\n")
+
+    # Retrieve context once, use for both agents
+    knowledge_context = search_knowledge_base(topic, n_results=5)
+
+    print(knowledge_context)
+    print("=" * 80)
+    print("🤖 Crew execution starting...\n")
+
+    research_task = Task(
+        description=(
+            f"Research the following topic using the provided knowledge base: {topic}\n\n"
+            f"{knowledge_context}\n"
+            f"Organize your findings as a bulleted list with [source: filename] citations."
+        ),
+        expected_output="A bulleted list of facts with [source: filename] citations.",
+        agent=researcher,
+    )
+
+    editing_task = Task(
+        description="Turn the research notes into a polished 2-paragraph briefing.",
+        expected_output="A 2-paragraph briefing with sources preserved.",
+        agent=editor,
+        context=[research_task],
+    )
+
+    crew = Crew(
+        agents=[researcher, editor],
+        tasks=[research_task, editing_task],
+        process=Process.sequential,
+        verbose=True,
+    )
+
+    result = crew.kickoff()
+    print("\n=== FINAL BRIEFING ===\n")
+    print(result)
+```
+
+### Run the multi-agent crew
+
+```shell
+docker compose run --rm python python src/crew_with_rag_context.py
+```
+
+> [!NOTE]
+> Watch the workflow:
+>
+> 1. **Knowledge retrieval**: Results are fetched and displayed
+> 2. **Researcher task**: Agent gathers facts with source citations
+> 3. **Editor task**: Receives researcher notes and polishes them into prose
+> 4. **Final output**: A polished 2-paragraph briefing with citations preserved
+>
+> This demonstrates sequential multi-agent collaboration with shared context.
+
+---
+
+## 5. Human-in-the-loop: Approval gates for agent actions
+
+**Goal:** Add a human approval gate so you review the Researcher's output before the Editor acts on it.
+
+Autonomous doesn't have to mean unsupervised. CrewAI lets you drop a human gate onto any task with a single flag. This is your panic handbrake.
+
+### Build a gated crew with context injection
+
+Create `src/crew_hitl.py`:
+
+```python
+import sys
+from pathlib import Path
+
+import requests
+import chromadb
+from crewai import Agent, Task, Crew, LLM, Process
+
+sys.path.insert(0, str(Path(__file__).parent))
+import config
+
+
+def get_embedding(text: str) -> list[float]:
+    """Generate an embedding for a text query."""
+    response = requests.post(
+        f"{config.OLLAMA_BASE_URL}/api/embeddings",
+        json={"model": config.EMBEDDING_MODEL, "prompt": text},
+    )
+    response.raise_for_status()
+    return response.json()["embedding"]
+
+
+def search_knowledge_base(query: str, n_results: int = 3) -> str:
+    """Search the knowledge base and return formatted results."""
+    client = chromadb.HttpClient(host=config.CHROMA_HOST, port=8000)
+    collection = client.get_collection(name=config.COLLECTION_NAME)
+    results = collection.query(query_embeddings=[get_embedding(query)], n_results=n_results)
+
+    chunks = results.get("documents", [[]])[0]
+    sources = [m.get("source", "unknown") for m in results.get("metadatas", [[]])[0]]
+
+    if not chunks:
+        return "No relevant information found in knowledge base."
+
+    formatted = "=== KNOWLEDGE BASE RESULTS ===\n\n"
+    for i, (source, chunk) in enumerate(zip(sources, chunks), 1):
+        formatted += f"[{i}] From {source}:\n{chunk}\n\n"
+
+    return formatted
+
+
+llm = LLM(
+    model=f"ollama/{config.GENERATION_MODEL}",
+    base_url=config.OLLAMA_BASE_URL,
 )
 
-editing_task = Task(
-    description="Turn the research notes into a polished briefing.",
-    expected_output="A 2-paragraph briefing with sources preserved.",
-    agent=editor,
-    context=[research_task],
+researcher = Agent(
+    role="Researcher",
+    goal="Gather accurate facts from the knowledge base and organize them",
+    backstory="You are a meticulous researcher who finds facts and cites sources. You never speculate.",
+    llm=llm,
+    verbose=True,
 )
 
-crew = Crew(
-    agents=[researcher, editor],
-    tasks=[research_task, editing_task],
-    process=Process.sequential,
+editor = Agent(
+    role="Editor",
+    goal="Turn research notes into a polished, reader-friendly briefing",
+    backstory=(
+        "You take raw research notes and shape them into clear prose for a technical audience. "
+        "You preserve every source citation from the original research."
+    ),
+    llm=llm,
     verbose=True,
 )
 
 if __name__ == "__main__":
-    result = crew.kickoff(inputs={"topic": "security and password policy"})
-    print("\n=== RESULT ===\n")
+    topic = "security and password policy"
+
+    print(f"📚 Searching knowledge base for: '{topic}'\n")
+
+    # Retrieve context once, use for both agents
+    knowledge_context = search_knowledge_base(topic, n_results=5)
+
+    print(knowledge_context)
+    print("=" * 80)
+    print("🤖 Crew execution starting...\n")
+
+    research_task = Task(
+        description=(
+            f"Research the following topic using the provided knowledge base: {topic}\n\n"
+            f"{knowledge_context}\n"
+            f"Organize your findings as a bulleted list with [source: filename] citations."
+        ),
+        expected_output="A bulleted list of facts with [source: filename] citations.",
+        agent=researcher,
+        human_input=True,  # <-- Pause for human approval after research
+    )
+
+    editing_task = Task(
+        description="Turn the research notes into a polished 2-paragraph briefing.",
+        expected_output="A 2-paragraph briefing with sources preserved.",
+        agent=editor,
+        context=[research_task],
+    )
+
+    crew = Crew(
+        agents=[researcher, editor],
+        tasks=[research_task, editing_task],
+        process=Process.sequential,
+        verbose=True,
+    )
+
+    result = crew.kickoff()
+    print("\n=== FINAL BRIEFING ===\n")
     print(result)
-```
-
-### Run the crew
-
-```shell
-docker compose run --rm python python src/crew.py
-```
-
-> [!NOTE]
-> Watch the handoff in the verbose output:
->
-> 1. The Researcher runs first, uses the knowledge base, and produces a bulleted list of facts
-> 2. The Editor receives those facts as context and produces the final prose
->
-> This is the essence of a crew: different agents with different strengths, collaborating sequentially.
-
-<!--  -->
-
-> [!TIP]
-> Try changing `Process.sequential` to `Process.hierarchical` and adding a `manager_llm` for a different collaboration pattern. (Save this for after the workshop as it needs additional setup.)
-
----
-
-## 6. Human-in-the-loop
-
-**Goal:** Add an approval gate so a human reviews the Researcher's output before the Editor acts on it.
-
-Autonomous doesn't have to mean unsupervised. CrewAI lets you drop a human gate onto any task with a single flag. This is your panic handbrake.
-
-### Add human approval to the research task
-
-Copy `src/crew.py` to `src/crew_hitl.py`, then add `human_input=True` to the research task:
-
-```python
-research_task = Task(
-    description="Research the following topic using the knowledge base: {topic}",
-    expected_output="A bulleted list of facts with [source: filename] citations.",
-    agent=researcher,
-    human_input=True,  # <-- add this
-)
 ```
 
 ### Run the gated crew
@@ -605,7 +657,9 @@ docker compose run --rm python python src/crew_hitl.py
 
 ---
 
-## 7. Cleanup
+---
+
+## 6. Cleanup
 
 **Goal:** Tidy up resources and reclaim disk space.
 
@@ -630,21 +684,20 @@ docker compose ps -a
 
 ## 🎉 Congratulations
 
-You've taken your local AI stack from answering questions to taking action, under your control.
+You've taken your local AI stack from answering questions to building reasoning agents, all under your control.
 
 ✅ **Built** a single agent that reasons through a task  
-✅ **Bound** agents to tools on your filesystem and local APIs  
-✅ **Connected** an agent to your private knowledge base via RAG  
-✅ **Composed** two agents into a collaborating Researcher + Editor crew  
+✅ **Connected** agents to your private knowledge base via RAG with context injection  
+✅ **Composed** multiple agents into a collaborating Researcher + Editor crew  
 ✅ **Added** a human-in-the-loop approval gate so the crew never runs away  
 ✅ **Ran** the whole thing air-gapped, with nothing leaving your machine
 
 ### Where to go next
 
-| Topic                      | Tool / Approach                                  |
-| -------------------------- | ------------------------------------------------ |
-| More tools                 | Filesystem, web search (local only), Python REPL |
-| Evaluating agent behaviour | Promptfoo with agent trajectories                |
-| Hierarchical crews         | CrewAI `Process.hierarchical` + manager agent    |
-| Graph-based workflows      | LangGraph for stateful, branching agents         |
-| Production observability   | Self-hosted Langfuse for agent tracing           |
+| Topic                          | Tool / Approach                                  |
+| ------------------------------ | ------------------------------------------------ |
+| Tool binding                   | Add CrewAI tools to agents (with larger models)  |
+| Evaluating agent behaviour     | Promptfoo with agent trajectories                |
+| Hierarchical crews             | CrewAI `Process.hierarchical` + manager agent    |
+| Graph-based workflows          | LangGraph for stateful, branching agents         |
+| Production observability       | Self-hosted Langfuse for agent tracing           |

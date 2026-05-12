@@ -33,7 +33,7 @@ docker pull curlimages/curl:latest
 ## Download models
 
 ```shell
-docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -L -o /data/models/qwen2.5-1.5b-instruct-Q4_K_M.gguf "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf?download=true"
+docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -L -o /data/models/phi3-mini.gguf "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf?download=true"
 ```
 
 ```shell

@@ -10,7 +10,7 @@ Workshop repository for "Autonomous Agents: Building Your Local AI Crew" — a h
 
 Three Docker services defined in `workshop/docker-compose.yaml`:
 
-- **ollama** — local LLM inference (qwen2.5:1.5b for generation, nomic-embed-text for embeddings), port 11434
+- **ollama** — local LLM inference (phi3:mini for generation, nomic-embed-text for embeddings), port 11434
 - **chromadb** — vector database for RAG, port 8000
 - **python** — runs on-demand via a Docker profile (`--profile python`), not started by `docker compose up`
 
@@ -35,7 +35,7 @@ All commands run from the `workshop/` directory.
 docker compose up
 
 # Import models into Ollama
-docker compose exec ollama ollama create qwen2.5:1.5b -f /root/workshop/Modelfile.qwen2.5
+docker compose exec ollama ollama create phi3:mini -f /root/workshop/Modelfile.phi3
 docker compose exec ollama ollama create nomic-embed-text -f /root/workshop/Modelfile.nomic-embed-text
 
 # Install Python dependencies
@@ -47,9 +47,8 @@ docker compose run --rm python python src/embed.py
 
 # Run agent scripts
 docker compose run --rm python python src/agent_basic.py
-docker compose run --rm python python src/agent_with_filesystem.py
-docker compose run --rm python python src/agent_with_rag.py
-docker compose run --rm python python src/crew.py
+docker compose run --rm python python src/agent_with_rag_context.py
+docker compose run --rm python python src/crew_with_rag_context.py
 docker compose run --rm python python src/crew_hitl.py
 
 # Cleanup
