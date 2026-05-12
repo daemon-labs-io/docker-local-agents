@@ -694,10 +694,10 @@ You've taken your local AI stack from answering questions to building reasoning 
 
 ### Where to go next
 
-| Topic                          | Tool / Approach                                  |
-| ------------------------------ | ------------------------------------------------ |
-| Tool binding                   | Add CrewAI tools to agents (with larger models)  |
-| Evaluating agent behaviour     | Promptfoo with agent trajectories                |
-| Hierarchical crews             | CrewAI `Process.hierarchical` + manager agent    |
-| Graph-based workflows          | LangGraph for stateful, branching agents         |
-| Production observability       | Self-hosted Langfuse for agent tracing           |
+| Topic                      | Tool / Approach                                 |
+| -------------------------- | ----------------------------------------------- |
+| Tool binding               | Add CrewAI tools to agents (with larger models) |
+| Evaluating agent behaviour | Promptfoo with agent trajectories               |
+| Hierarchical crews         | CrewAI `Process.hierarchical` + manager agent   |
+| Graph-based workflows      | LangGraph for stateful, branching agents        |
+| Production observability   | Self-hosted Langfuse for agent tracing          |
