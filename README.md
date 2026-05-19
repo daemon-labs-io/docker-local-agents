@@ -189,7 +189,13 @@ docker compose run --rm python pip install -r src/requirements.txt
 
 ### Create the first agent
 
-Create `src/agent_basic.py`:
+Create the basic agent file:
+
+```text
+src/agent_basic.py
+```
+
+And add the following:
 
 ```python
 import time
