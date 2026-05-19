@@ -714,13 +714,3 @@ You've taken your local AI stack from answering questions to building reasoning 
 ✅ **Composed** multiple agents into a collaborating Researcher + Editor crew  
 ✅ **Added** a human-in-the-loop approval gate so the crew never runs away  
 ✅ **Ran** the whole thing air-gapped, with nothing leaving your machine
-
-### Where to go next
-
-| Topic                      | Tool / Approach                                 |
-| -------------------------- | ----------------------------------------------- |
-| Tool binding               | Add CrewAI tools to agents (with larger models) |
-| Evaluating agent behaviour | Promptfoo with agent trajectories               |
-| Hierarchical crews         | CrewAI `Process.hierarchical` + manager agent   |
-| Graph-based workflows      | LangGraph for stateful, branching agents        |
-| Production observability   | Self-hosted Langfuse for agent tracing          |
