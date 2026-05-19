@@ -79,12 +79,12 @@ The `workshop/` directory contains the Docker Compose file, Modelfiles, and Pyth
 cd ./workshop
 ```
 
-### Install dependencies and start services
+### Start services and install dependencies
 
 Start the Docker services:
 
 ```shell
-docker compose up
+docker compose up -d
 ```
 
 > [!NOTE]  
@@ -95,9 +95,6 @@ Verify all services are running:
 ```shell
 docker compose ps
 ```
-
-> [!TIP]  
-> In Visual Studio Code, you can open a new terminal via Terminal → Split Terminal or the + button to run this command while docker compose up runs in the current terminal.
 
 Import models from local files:
 
@@ -111,6 +108,16 @@ docker compose exec ollama ollama create nomic-embed-text -f /root/workshop/Mode
 
 > [!TIP]
 > **Hardware tier expectations:** `phi3:mini` is around 2.4 GB and runs comfortably on 8 GB CPU-only laptops with responsive inference times (8-15 seconds per task). GPU-accelerated machines (Apple Silicon, Nvidia) will be faster but the workshop works well on CPU-only tier.
+
+Verify models have been imported:
+
+```shell
+docker compose exec ollama ollama list
+```
+
+> [!NOTE]
+> You should see `phi3:mini` and `nomic-embed-text` listed.  
+> We use `phi3:mini` because it balances model quality with fast inference on CPU-only machines, completing agent tasks in 8-15 seconds.
 
 Install Python dependencies:
 
@@ -152,15 +159,6 @@ docker compose run --rm python python src/embed.py
 > Stored X embeddings in ChromaDB
 > Done!
 > ```
-
-### Verify everything is working
-
-```shell
-docker compose exec ollama ollama list
-```
-
-> [!NOTE]
-> You should see `phi3:mini` and `nomic-embed-text` listed. We use `phi3:mini` because it balances model quality with fast inference on CPU-only machines, completing agent tasks in 8-15 seconds.
 
 ---
 
@@ -663,9 +661,7 @@ docker compose run --rm python python src/crew_hitl.py
 
 **Goal:** Tidy up resources and reclaim disk space.
 
-Stop any running containers by pressing **Ctrl+C** in the terminal where `docker compose up` is running.
-
-Remove containers, volumes, and images built by the project:
+Stop and remove containers, volumes, and images built by the project:
 
 ```shell
 docker compose down -v --rmi local
