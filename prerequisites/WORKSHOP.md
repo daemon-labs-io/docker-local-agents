@@ -50,5 +50,5 @@ docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /
 ```
 
 > [!IMPORTANT]  
-> Once you've finished, [continue with the workshop](../README.md).  
+> Once you've finished, [continue with the workshop](../README.md#1-setup--start-services).  
 > If you're having issues, [try the individual prerequisites](./INDIVIDUAL.md).
