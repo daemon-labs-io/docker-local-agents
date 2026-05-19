@@ -107,7 +107,8 @@ docker compose exec ollama ollama create nomic-embed-text -f /root/workshop/Mode
 ```
 
 > [!TIP]
-> **Hardware tier expectations:** `phi3:mini` is around 2.4 GB and runs comfortably on 8 GB CPU-only laptops with responsive inference times (8-15 seconds per task). GPU-accelerated machines (Apple Silicon, Nvidia) will be faster but the workshop works well on CPU-only tier.
+> **Hardware tier expectations:** `phi3:mini` is around 2.4 GB and runs comfortably on 8 GB CPU-only laptops with responsive inference times (8-15 seconds per task).  
+> GPU-accelerated machines (Apple Silicon, Nvidia) will be faster but the workshop works well on CPU-only tier.
 
 Verify models have been imported:
 
@@ -185,7 +186,8 @@ docker compose run --rm python pip install -r src/requirements.txt
 ```
 
 > [!NOTE]
-> CrewAI pulls in a lot of transitive dependencies. Expect this to take 2 to 3 minutes on first run.
+> CrewAI pulls in a lot of transitive dependencies.  
+> Expect this to take 2 to 3 minutes on first run.
 
 ### Create the first agent
 
@@ -254,7 +256,8 @@ docker compose run --rm python python src/agent_basic.py
 ```
 
 > [!NOTE]
-> Watch the `verbose=True` output closely. You should see:
+> Watch the `verbose=True` output closely.  
+> You should see:
 >
 > - The agent's role and goal printed
 > - The task it receives
@@ -265,7 +268,8 @@ docker compose run --rm python python src/agent_basic.py
 <!--  -->
 
 > [!TIP]
-> With `phi3:mini`, expect 8-15 seconds per task. The timing is printed at the end of execution.
+> With `phi3:mini`, expect 8-15 seconds per task.  
+> The timing is printed at the end of execution.
 
 ---
 
@@ -275,7 +279,13 @@ docker compose run --rm python python src/agent_basic.py
 
 ### Create an agent with knowledge context
 
-Create `src/agent_with_rag_context.py`:
+Create RAG agent file:
+
+```text
+workshop/src/agent_with_rag_context.py
+```
+
+And add the following:
 
 ```python
 import sys
@@ -379,7 +389,8 @@ docker compose run --rm python python src/agent_with_rag_context.py
 > 3. **Reasoning**: Agent reasons over the provided context
 > 4. **Citation**: Agent cites sources in its answer
 >
-> This is how RAG works at its core: retrieve relevant context, provide it to the agent, let the agent reason over it. No tool calling needed.
+> This is how RAG works at its core: retrieve relevant context, provide it to the agent, let the agent reason over it.  
+> No tool calling needed.
 
 ---
 
@@ -391,7 +402,13 @@ This section extends the RAG pattern to a **multi-agent workflow**: a Researcher
 
 ### Build a multi-agent crew with shared context
 
-Create `src/crew_with_rag_context.py`:
+Create the RAG crew file:
+
+```text
+workshop/src/crew_with_rag_context.py
+```
+
+And add the following:
 
 ```python
 import sys
@@ -525,7 +542,13 @@ Autonomous doesn't have to mean unsupervised. CrewAI lets you drop a human gate 
 
 ### Build a gated crew with context injection
 
-Create `src/crew_hitl.py`:
+Create  the human-in-the-loop crew file:
+
+```text
+workshop/src/crew_hitl.py
+```
+
+And add the following:
 
 ```python
 import sys
@@ -637,11 +660,12 @@ if __name__ == "__main__":
 ### Run the gated crew
 
 ```shell
-docker compose run --rm python python src/crew_hitl.py
+docker compose run --rm -it python python src/crew_hitl.py
 ```
 
 > [!NOTE]
-> After the Researcher produces its draft, CrewAI will pause and prompt you in the terminal. You have three options:
+> After the Researcher produces its draft, CrewAI will pause and prompt you in the terminal.  
+> You have three options:
 >
 > 1. Press Enter to accept the output as it stands
 > 2. Type corrections or additional instructions to refine the output before handoff
@@ -651,13 +675,10 @@ docker compose run --rm python python src/crew_hitl.py
 
 <!--  -->
 
-> [!WARNING]
-> If the prompt appears but you can't type into it, your terminal might not have an attached TTY. Try rerunning with `docker compose run --rm -it python python src/crew_hitl.py`.
-
-<!--  -->
-
 > [!TIP]
-> In production you'd replace the terminal prompt with a Slack message, a ticket, or an email approval. The primitive is identical: the task halts until a human responds. This is the difference between an agent that helps and an agent that runs away.
+> In production you'd replace the terminal prompt with a Slack message, a ticket, or an email approval.  
+> The primitive is identical: the task halts until a human responds.  
+> This is the difference between an agent that helps and an agent that runs away.
 
 ---
 
