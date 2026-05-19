@@ -168,7 +168,7 @@ docker compose run --rm python python src/embed.py
 
 ### Install CrewAI
 
-Add CrewAI and its tools package to `src/requirements.txt`:
+Add CrewAI and its tools package to `workshop/src/requirements.txt`:
 
 ```text
 chromadb>=0.5.0
@@ -192,7 +192,7 @@ docker compose run --rm python pip install -r src/requirements.txt
 Create the basic agent file:
 
 ```text
-src/agent_basic.py
+workshop/src/agent_basic.py
 ```
 
 And add the following:
