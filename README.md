@@ -542,7 +542,7 @@ Autonomous doesn't have to mean unsupervised. CrewAI lets you drop a human gate 
 
 ### Build a gated crew with context injection
 
-Create  the human-in-the-loop crew file:
+Create the human-in-the-loop crew file:
 
 ```text
 workshop/src/crew_hitl.py
