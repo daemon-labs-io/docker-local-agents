@@ -42,7 +42,7 @@ docker tag registry.labs.dae.mn/curl:latest curlimages/curl:latest
 ## Download models
 
 ```shell
-docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/phi3-mini.gguf https://files.labs.dae.mn/phi3-mini.gguf
+docker run --rm -v $(pwd)/workshop/data/models:/data/models curlimages/curl -o /data/models/phi3-mini.gguf https://files.labs.dae.mn/Phi-3-mini-4k-instruct-q4.gguf
 ```
 
 ```shell
