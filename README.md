@@ -394,6 +394,11 @@ docker compose run --rm python python src/agent_with_rag_context.py
 
 ---
 
+> [!IMPORTANT]
+> Let's take a break.
+
+---
+
 ## 4. Knowledge augmentation: Multi-agent reasoning with RAG
 
 **Goal:** Build a multi-agent crew where agents collaborate, with both agents reasoning over pre-retrieved knowledge base context.
